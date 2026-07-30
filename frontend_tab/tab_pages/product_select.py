@@ -1,11 +1,14 @@
 """데이터베이스조회 탭입니다."""
-import httpx
+
 import streamlit as st
 import pandas as pd
-from clients.product_client import product_select_all 
+from clients.product_client import (
+    product_select_all, 
+    product_delete,
+    product_update
+)
 
-# API_BASE_URL = "https://zero2-mini-project-2.onrender.com"  # 프론트엔드가 호출할 백엔드 서버의 기본 주소를 한 곳에서 관리합니다.
-API_BASE_URL = "http://127.0.0.1:8000" 
+
 
 @st.dialog("삭제")
 def show_del(p:dict) -> None:
@@ -13,8 +16,8 @@ def show_del(p:dict) -> None:
     st.write(f"{p['name']}삭제 하시겠습니까")
     if st.button("삭제"):
         with st.spinner("삭제 진행"):
-            response = httpx.delete(f"{API_BASE_URL}/product/delete/{p['id']}", timeout= 10.0)
-        if response.status_code == 200:
+            result = product_delete(p["id"])  
+        if result is not None:
             st.rerun()
 
 @st.dialog("수정")
@@ -26,8 +29,8 @@ def show_up(p:dict) -> None:
         if st.form_submit_button("수정"):
             payload = {"name":product_name, "price":product_price}
             with st.spinner("데이터 요청"):
-                response = httpx.put(f"{API_BASE_URL}/product/update/{p['id']}",json=payload, timeout= 10.0)
-            if response.status_code == 200:
+                result = product_update(p["id"], payload)
+            if result is not None:
                 st.rerun()
 
 
@@ -40,7 +43,6 @@ def product_select() -> None:
 
     with st.spinner("데이터 요청"):
         result = product_select_all()
-
 
     if not result:
         st.info("Product 가 없습니다.")

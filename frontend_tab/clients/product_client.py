@@ -8,11 +8,10 @@ def product_insert():
     ""
 
 def product_delete(product_id: int):
-    # JSON
     return request("DELETE",f"/product/delete/{product_id}")
 
-def product_update():
-    ""
+def product_update(product_id: int, product: dict):
+    return request("PUT",f"/product/update/{product_id}", json=product)
 
 def product_select_all():
     return request("GET",f"/product/getall")
