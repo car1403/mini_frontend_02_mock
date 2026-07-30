@@ -40,7 +40,6 @@ def product_select() -> None:
 
     st.subheader("Product 조회")
     st.caption("product 테이블을 선택하고 데이터를 확인합니다.")
-
     with st.spinner("데이터 요청"):
         result = product_select_all()
 

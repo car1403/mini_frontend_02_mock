@@ -4,8 +4,8 @@
 from typing import Any
 from core.api_client import request
 
-def product_insert():
-    ""
+def product_insert(product: dict):
+     return request("POST",f"/product/create", json=product)
 
 def product_delete(product_id: int):
     return request("DELETE",f"/product/delete/{product_id}")
