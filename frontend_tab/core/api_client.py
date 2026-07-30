@@ -7,7 +7,7 @@ import httpx
 
 
 BACKEND_URL = "https://mini-frontend-02-mock-m4wy.onrender.com"
-REQUEST_TIMEOUT = 10.0
+REQUEST_TIMEOUT = 15.0
 
 
 class BackendAPIError(Exception):
