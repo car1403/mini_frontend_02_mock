@@ -36,6 +36,8 @@ if st.session_state.loginout != stored_loginout:
         st.session_state.loginout,
         key=f"save_{st.session_state.loginout}",
     )
+
+    
 home_page = st.Page("app_pages/01_home.py", title="홈", icon="🏠", default=True)
 login_page = st.Page("app_pages/00_login.py", title="로그인", icon="🔐")
 signup_page = st.Page("app_pages/02_signup.py", title="회원가입", icon="📝")
