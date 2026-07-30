@@ -4,11 +4,15 @@ import streamlit as st
 from clients.auth_client import login_process, logout_process
 from core.api_client import BackendAPIError
 
-def init_state(stored_loginout: str = "logout") -> None:
+def init_state(
+    stored_loginout: str = "logout",
+    stored_login_id: str = "",
+    stored_login_name: str = "",
+) -> None:
     st.session_state.setdefault("loginout", stored_loginout)
-    st.session_state.setdefault("login_id", "")
+    st.session_state.setdefault("login_id", stored_login_id)
     st.session_state.setdefault("login_pwd", "")
-    st.session_state.setdefault("login_name", "")
+    st.session_state.setdefault("login_name", stored_login_name)
 
 
 def login(id:str, pwd:str) -> None:
