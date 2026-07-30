@@ -6,7 +6,8 @@ from typing import Any
 import httpx
 
 
-BACKEND_URL = "https://mini-frontend-02-mock-m4wy.onrender.com"
+BACKEND_URL = "http://127.0.0.1:8000"
+# BACKEND_URL = "https://mini-frontend-02-mock-m4wy.onrender.com"
 REQUEST_TIMEOUT = 15.0
 
 
