@@ -10,7 +10,17 @@ st.set_page_config(
     page_icon="🌱",
     layout="wide",
 )
-
+st.markdown(
+    """
+    <style>
+    section[data-testid="stSidebar"] {
+        width: 220px !important;
+        min-width: 220px !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
 storage = SessionStorage(key="login_session_storage")
 stored_loginout = storage.getItem("loginout") or "logout"
@@ -31,12 +41,15 @@ signup_page = st.Page("app_pages/02_signup.py", title="회원가입", icon="📝
 weather_page = st.Page("app_pages/03_weather.py", title="날씨조회", icon="📝")
 health_page = st.Page("app_pages/04_health.py", title="서버체크", icon="📝")
 
-
+product_select_page = st.Page("app_pages/product_select.py", title="Product 조회", icon="📝")
+product_create_page = st.Page("app_pages/product_create.py", title="Product 입력", icon="📝")
 
 if st.session_state.loginout == "login":
     pages = [
         home_page,
-        weather_page
+        weather_page,
+        product_select_page,
+        product_create_page
     ]
 else:
     pages = [home_page, login_page, signup_page, health_page]
@@ -50,6 +63,8 @@ with st.sidebar:
     if st.session_state.loginout == "login":
         st.button("LOGOUT", on_click=logout, use_container_width=True)
         st.page_link(weather_page)
+        st.page_link(product_select_page)
+        st.page_link(product_create_page)
     else:
         st.page_link(login_page)
         st.page_link(signup_page)
