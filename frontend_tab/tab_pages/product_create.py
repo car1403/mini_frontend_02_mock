@@ -2,6 +2,7 @@
 
 import streamlit as st
 from clients.product_client import product_insert
+from core.api_client import BackendAPIError
 
 
 def product_create() -> None:
@@ -24,13 +25,16 @@ def product_create() -> None:
         else:
             product_name = product_name.strip()
             payload = {"id": product_id, "name": product_name, "price":product_price}  # 백엔드 Pydantic 모델이 기대하는 JSON 구조로 데이터를 만듭니다.
+            try:
+                with st.spinner("전송후 기다립니다."):
+                    result = product_insert(payload)
 
-            with st.spinner("전송후 기다립니다."):
-                result = product_insert(payload)
+                if result is not None:
+                    st.info("입력 완료")
+                    st.info(f"{result["id"]} {result["name"]} {result["price"]}")
+                else:
+                    st.warning("오류")
+            except BackendAPIError as error:
+                st.error(str(error))
 
-            if result is not None:
-                st.info("입력 완료")
-                st.info(f"{result["id"]} {result["name"]} {result["price"]}")
-            else:
-                st.warning("오류")
       
