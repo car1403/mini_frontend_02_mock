@@ -25,10 +25,12 @@ st.markdown(
 storage = SessionStorage(key="login_session_storage")
 
 stored_loginout = storage.getItem("loginout") or "logout"
+stored_login_id = storage.getItem("login_id") or ""
+stored_login_name = storage.getItem("login_name") or ""
 
 
 if "loginout" not in st.session_state:
-    init_state(stored_loginout)
+    init_state(stored_loginout, stored_login_id, stored_login_name)
 
 if st.session_state.loginout != stored_loginout:
     storage.setItem(
@@ -36,6 +38,21 @@ if st.session_state.loginout != stored_loginout:
         st.session_state.loginout,
         key=f"save_{st.session_state.loginout}",
     )
+if st.session_state.loginout == "logout":
+    # 브라우저 Session Storage의 로그인 정보 삭제
+    storage.deleteAll(key="login_session_storage")
+else:
+    storage.setItem(
+        "login_id",
+        st.session_state.login_id,
+        key="save_login_id",
+    )
+    storage.setItem(
+        "login_name",
+        st.session_state.login_name,
+        key="save_login_name",
+    )
+
 home_page = st.Page("app_pages/01_home.py", title="홈", icon="🏠", default=True)
 login_page = st.Page("app_pages/00_login.py", title="로그인", icon="🔐")
 signup_page = st.Page("app_pages/02_signup.py", title="회원가입", icon="📝")

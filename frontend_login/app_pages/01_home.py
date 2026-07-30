@@ -4,7 +4,7 @@ from core.auth import is_logged_in
 st.title("🏠 홈")
 
 if is_logged_in() == True:
-    st.info(f"{st.session_state.login_id} 로그인 상태 입니다.")
+    st.info(f"{st.session_state.login_name} 로그인 상태 입니다.")
 
 st.info("Layout에 오신 것을 환영합니다.")
 
