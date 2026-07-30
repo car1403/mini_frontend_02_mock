@@ -6,7 +6,7 @@ from typing import Any
 import httpx
 
 
-BACKEND_URL = "http://127.0.0.1:8000"
+BACKEND_URL = "http://127.0.0.1:800"
 REQUEST_TIMEOUT = 10.0
 
 
@@ -14,11 +14,7 @@ class BackendAPIError(Exception):
     """백엔드 연결 또는 API 응답 처리 중 발생한 오류입니다."""
 
 
-def request(
-    method: str,
-    path: str,
-    json: dict[str, Any] | None = None,
-):
+def request(method: str, path: str, json: dict[str, Any] | None = None):
     try:
         response = httpx.request(
             method,
