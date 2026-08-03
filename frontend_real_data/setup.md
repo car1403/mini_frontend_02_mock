@@ -1,9 +1,9 @@
 # Setup
 
 ```powershell
-cd mini_frontend_02
+cd frontend_real_data
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-python -m streamlit run app.py
+pip install -r requirements.txt
+streamlit run app.py
 ```

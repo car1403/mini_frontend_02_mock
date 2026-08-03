@@ -9,5 +9,4 @@ class RealDataCreate(BaseModel):
 
 class RealData(RealDataCreate):
     id: str
-    created_by: str
     created_at: str

@@ -3,15 +3,10 @@ import streamlit as st
 
 from clients.real_client import create_real_data, get_recent_real_data
 from core.api_client import BackendAPIError
-from core.auth import is_logged_in
 
 
 st.title("1. 센서 데이터 입력·조회")
 st.caption("입력하면 Supabase에 저장되고 Upstash Redis로도 발행됩니다.")
-
-if not is_logged_in():
-    st.warning("먼저 로그인해 주세요.")
-    st.stop()
 
 with st.form("real_data_form", clear_on_submit=True):
     device_name = st.text_input("장치 이름", value="sensor-01")

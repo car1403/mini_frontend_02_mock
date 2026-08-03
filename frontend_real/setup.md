@@ -1,9 +1,8 @@
-# Setup
+# 설치
 
 ```powershell
-cd mini_frontend_02
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-python -m streamlit run app.py
+pip install -r requirements.txt
+streamlit run app.py
 ```
+
+`http://127.0.0.1:8000`에서 `backend_real`이 먼저 실행 중이어야 합니다.

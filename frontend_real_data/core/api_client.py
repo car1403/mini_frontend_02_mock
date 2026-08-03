@@ -15,26 +15,16 @@ def request(
     method: str,
     path: str,
     json: dict[str, Any] | None = None,
-    access_token: str | None = None,
 ):
-    headers = {}
-
-    if access_token:
-        headers["Authorization"] = f"Bearer {access_token}"
-
     try:
         response = httpx.request(
             method,
             f"{BACKEND_URL}{path}",
             json=json,
-            headers=headers,
             timeout=REQUEST_TIMEOUT,
         )
     except httpx.RequestError as error:
         raise BackendAPIError("백엔드 서버에 연결할 수 없습니다.") from error
-
-    if response.status_code == 401:
-        raise BackendAPIError("로그인이 필요하거나 토큰이 만료되었습니다.")
 
     if response.is_error:
         try:

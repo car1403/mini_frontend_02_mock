@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS customers (
+    id TEXT PRIMARY KEY,
+    pwd TEXT NOT NULL,
+    name TEXT NOT NULL
+);

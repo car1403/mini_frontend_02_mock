@@ -1,77 +1,45 @@
+import pandas as pd
 import streamlit as st
-from streamlit_session_browser_storage import SessionStorage
 
-from core.auth import init_state, logout
+from clients.real_client import receive_real_data
 
 
-st.set_page_config(page_title="JWT Login", page_icon="🔐", layout="wide")
-
-storage = SessionStorage(key="jwt_login_session_storage")
-
-stored_loginout = storage.getItem("loginout") or "logout"
-stored_login_id = storage.getItem("login_id") or ""
-stored_access_token = storage.getItem("access_token") or ""
-
-if "loginout" not in st.session_state:
-    init_state(stored_loginout, stored_login_id, stored_access_token)
-
-if st.session_state.loginout == "logout":
-    storage.deleteAll(key="jwt_login_session_storage")
-else:
-    storage.setItem("loginout", "login", key="save_loginout")
-    storage.setItem("login_id", st.session_state.login_id, key="save_login_id")
-    storage.setItem(
-        "access_token",
-        st.session_state.access_token,
-        key="save_access_token",
-    )
-
-home_page = st.Page("app_pages/01_home.py", title="홈", icon="🏠", default=True)
-login_page = st.Page("app_pages/00_login.py", title="로그인", icon="🔐")
-signup_page = st.Page("app_pages/02_signup.py", title="회원가입", icon="📝")
-weather_page = st.Page("app_pages/03_weather.py", title="날씨조회", icon="🌤️")
-health_page = st.Page("app_pages/04_health.py", title="서버체크", icon="🩺")
-product_select_page = st.Page(
-    "app_pages/product_select.py",
-    title="Product 조회",
-    icon="📋",
-)
-product_create_page = st.Page(
-    "app_pages/product_create.py",
-    title="Product 입력",
-    icon="➕",
-)
-real_data_page = st.Page(
-    "app_pages/real_data.py",
-    title="실시간 온도",
-    icon="🌡️",
+st.set_page_config(
+    page_title="아주 쉬운 실시간 온도",
+    page_icon="🌡️",
+    layout="wide",
 )
 
-if st.session_state.loginout == "login" and st.session_state.access_token:
-    pages = [
-        home_page,
-        weather_page,
-        product_select_page,
-        product_create_page,
-        real_data_page,
-    ]
-else:
-    pages = [home_page, login_page, signup_page, health_page]
+st.title("가상 온도 실시간 보기")
+st.caption("화면이 열리면 로그인 없이 가상 데이터 10개를 자동으로 받습니다.")
 
-navigation = st.navigation(pages, position="hidden")
+metric_box = st.empty()
+table_box = st.empty()
+status_box = st.empty()
 
-with st.sidebar:
-    st.page_link(home_page)
+received_data = []
+status_box.info("백엔드 SSE에 연결하고 있습니다.")
 
-    if st.session_state.loginout == "login" and st.session_state.access_token:
-        st.button("LOGOUT", on_click=logout, use_container_width=True)
-        st.page_link(weather_page)
-        st.page_link(product_select_page)
-        st.page_link(product_create_page)
-        st.page_link(real_data_page)
-    else:
-        st.page_link(login_page)
-        st.page_link(signup_page)
-        st.page_link(health_page)
+try:
+    for item in receive_real_data(count=10):
+        received_data.insert(0, item)
 
-navigation.run()
+        metric_box.metric(
+            label=f"{item['created_at']} 현재 온도",
+            value=f"{item['temperature']}℃",
+            delta=item["status"],
+        )
+        table_box.dataframe(
+            pd.DataFrame(received_data),
+            use_container_width=True,
+            hide_index=True,
+        )
+
+    status_box.success("가상 데이터 10개를 모두 받았습니다.")
+except RuntimeError as error:
+    status_box.error(str(error))
+
+st.info(
+    "백엔드가 한 번의 SSE 연결에서 데이터를 여러 번 보내고, "
+    "프론트엔드는 데이터가 도착할 때마다 위 화면을 바꿉니다."
+)

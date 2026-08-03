@@ -1,9 +1,8 @@
 import json
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
 
-from app.core.auth_dependency import get_current_user
 from app.schemes.real_scheme import RealData, RealDataCreate
 from app.services.real_service import (
     get_recent_data,
@@ -13,18 +12,15 @@ from app.services.real_service import (
 )
 
 
-real_router = APIRouter(tags=["Real Data"])
+real_router = APIRouter(prefix="/real-data", tags=["Real Data"])
 
 
-@real_router.post("/real-data", response_model=RealData)
-async def create_real_data(
-    data: RealDataCreate,
-    current_user: str = Depends(get_current_user),
-):
+@real_router.post("", response_model=RealData)
+async def create_real_data(data: RealDataCreate):
     """Supabase에 저장한 후 Redis로 실시간 이벤트를 발행합니다."""
 
     try:
-        saved_item = save_real_data(data, current_user)
+        saved_item = save_real_data(data)
     except Exception:
         raise HTTPException(
             status_code=503,
@@ -45,11 +41,8 @@ async def create_real_data(
     return saved_item
 
 
-@real_router.get("/real-data/recent", response_model=list[RealData])
-def recent_real_data(
-    limit: int = Query(default=20, ge=1, le=100),
-    current_user: str = Depends(get_current_user),
-):
+@real_router.get("/recent", response_model=list[RealData])
+def recent_real_data(limit: int = Query(default=20, ge=1, le=100)):
     """Supabase에 저장된 최근 데이터를 조회합니다."""
 
     try:
@@ -61,11 +54,9 @@ def recent_real_data(
         )
 
 
-@real_router.get("/real-data/stream")
-async def stream_real_data(
-    current_user: str = Depends(get_current_user),
-):
-    """Redis에 새로 발행된 데이터만 SSE로 전달합니다."""
+@real_router.get("/stream")
+async def stream_real_data():
+    """Redis에 새로 발행된 데이터를 SSE로 전달합니다."""
 
     async def generate():
         try:
