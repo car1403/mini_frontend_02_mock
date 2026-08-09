@@ -6,12 +6,32 @@
             "packageManager": "ms-python.python:pip"
         },
         {
-            "path": "frontend_tab",
+            "path": "tab/frontend",
             "envManager": "ms-python.python:venv",
             "packageManager": "ms-python.python:pip"
         },
         {
             "path": "frontend",
+            "envManager": "ms-python.python:venv",
+            "packageManager": "ms-python.python:pip"
+        },
+        {
+            "path": "realtime_data_simple",
+            "envManager": "ms-python.python:venv",
+            "packageManager": "ms-python.python:pip"
+        },
+        {
+            "path": "realtime_data_simple/backend",
+            "envManager": "ms-python.python:venv",
+            "packageManager": "ms-python.python:pip"
+        },
+        {
+            "path": "realtime_data_simple/frontend",
+            "envManager": "ms-python.python:venv",
+            "packageManager": "ms-python.python:pip"
+        },
+        {
+            "path": "realtime_data_simple/frontend_admin",
             "envManager": "ms-python.python:venv",
             "packageManager": "ms-python.python:pip"
         }
