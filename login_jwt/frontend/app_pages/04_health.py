@@ -1,4 +1,4 @@
-# 04_health.py
+"""FastAPI 백엔드가 실행 중인지 확인하는 간단한 화면입니다."""
 
 import httpx  # FastAPI 같은 백엔드 API에 HTTP 요청을 보내기 위해 httpx 클라이언트를 가져옵니다.
 import streamlit as st  # Python 코드로 웹 화면을 만들기 위해 Streamlit을 st라는 별칭으로 가져옵니다.
@@ -9,7 +9,7 @@ st.title("FastAPI 상태 확인")  # Streamlit 화면의 가장 큰 제목을 �
 
 if st.button("백엔드 상태 확인"):  # 버튼을 누른 순간에만 API 요청을 보냅니다.
     try:
-
+        # spinner는 HTTP 응답을 기다리는 동안 진행 중이라는 메시지를 보여 줍니다.
         with st.spinner("서버 접속 중입니다."):
             response = httpx.get(f"{API_BASE_URL}/health", timeout=5.0)  # 백엔드 health check API에 GET 요청을 보냅니다.
         st.write("Status Code:", response.status_code)  # HTTP 상태 코드를 화면에 표시합니다.

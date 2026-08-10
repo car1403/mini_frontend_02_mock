@@ -1,3 +1,5 @@
+"""상품 생성·조회·삭제·수정 URL을 정의하는 라우터입니다."""
+
 from fastapi import APIRouter, Depends
 
 from app.core.auth_dependency import get_current_user
@@ -20,11 +22,15 @@ product_router = APIRouter(
 
 @product_router.post("/product/create")
 def create(product: ProductPublic) -> ProductPublic:
+    """요청 Body로 받은 상품을 생성합니다."""
+
     return product_create(product)
 
 
 @product_router.get("/product/get/{product_id}")
 def get(product_id: int) -> ProductPublic:
+    """URL에 포함된 ID로 상품 한 개를 조회합니다."""
+
     return product_get(product_id)
 
 # @product_router.get("/product/getall")
@@ -35,14 +41,20 @@ def get(product_id: int) -> ProductPublic:
 
 @product_router.get("/product/getall")
 def get_all() -> list[ProductPublic]:
+    """전체 상품 목록을 조회합니다."""
+
     return product_get_all()
 
 
 @product_router.delete("/product/delete/{product_id}")
 def delete(product_id: int) -> ProductPublic:
+    """URL에 포함된 ID의 상품을 삭제합니다."""
+
     return product_delete(product_id)
 
 
 @product_router.put("/product/update/{product_id}")
 def update(product_id: int, product: ProductUpdate) -> ProductPublic:
+    """상품 ID와 수정할 내용을 서비스 함수에 전달합니다."""
+
     return product_update(product_id, product)
