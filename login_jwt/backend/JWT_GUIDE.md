@@ -22,6 +22,8 @@ Product 요청에 JWT를 함께 전송
 
 JWT는 `JSON Web Token`의 줄임말입니다.
 
+JWT는 로그인 전용 기술이 아니라 서명된 정보를 전달하는 토큰 형식이며, 이 프로젝트에서는 로그인한 사용자를 확인하기 위한 Access Token으로 사용합니다.
+
 쉽게 말하면 로그인에 성공했다는 사실을 증명하는 **임시 출입증**입니다.
 
 회사 출입증을 예로 들어 보겠습니다.
@@ -216,7 +218,7 @@ xxxxx.yyyyy.zzzzz
 
 백엔드는 비밀키를 이용해 서명을 만듭니다. 누군가 Payload의 사용자 ID를 임의로 바꾸면 서명이 맞지 않기 때문에 토큰 검증에 실패합니다.
 
-> JWT의 Header와 Payload는 암호화된 비밀 정보가 아닙니다. 디코딩하면 내용을 볼 수 있으므로 비밀번호나 개인정보를 넣으면 안 됩니다.
+> JWT의 Header와 Payload는 암호화된 영역이 아니므로 누구나 디코딩해 내용을 볼 수 있습니다. 비밀번호나 인증키 같은 비밀정보는 절대 넣지 않고, 개인정보도 필요한 최소한만 넣어야 합니다.
 
 ## 5. 전체 로그인 흐름
 
@@ -256,6 +258,8 @@ Content-Type: application/json
 ### 네 번째: 프론트엔드가 JWT를 보관합니다
 
 `login_jwt/frontend`는 응답으로 받은 `access_token`을 Session Storage에 저장합니다.
+
+이 방식은 학습용으로 간단하지만, Session Storage는 JavaScript에서 접근할 수 있어 XSS 취약점이 있으면 토큰이 탈취될 수 있습니다. 실제 서비스에서는 `HttpOnly`, `Secure`, `SameSite` 속성을 적용한 쿠키나 브라우저가 JWT를 직접 보관하지 않는 BFF 구조를 검토해야 하며, 쿠키를 사용할 때는 CSRF 방어도 함께 필요합니다.
 
 ### 다섯 번째: Product 요청에 JWT를 넣습니다
 
@@ -353,6 +357,21 @@ product_router = APIRouter(
 `dependencies`에 `get_current_user`를 등록했기 때문에 이 라우터의 모든 Product API를 실행하기 전에 JWT 검사가 먼저 실행됩니다.
 
 따라서 create, get, getall, update, delete 함수마다 인증 코드를 반복해서 작성할 필요가 없습니다.
+
+현재 코드는 사용자가 로그인했는지를 확인하는 **인증(Authentication)**만 수행합니다. 사용자 역할이나 상품 소유권을 확인하는 **인가(Authorization)**는 별도로 구현해야 합니다.
+
+### JWT와 RLS는 어떤 관계인가요?
+
+RLS는 `Row Level Security`의 줄임말이며, 데이터베이스의 **행 단위 접근 권한**을 검사하는 기능입니다. JWT가 "이 사용자가 누구인지"를 증명한다면, RLS는 그 사용자에게 어떤 데이터 행의 조회·생성·수정·삭제를 허용할지 판단합니다.
+
+```text
+JWT 인증: 이 사용자는 누구인가?
+RLS 인가: 이 사용자가 어떤 데이터 행에 접근할 수 있는가?
+```
+
+RLS는 Supabase만의 기능이 아니라 PostgreSQL이 제공하는 보안 기능입니다. Supabase는 Access Token의 사용자 정보를 PostgreSQL의 `auth.uid()`와 연결해 RLS 정책에서 사용하기 쉽게 해 줍니다. AWS·Google Cloud·Azure·Neon 등의 PostgreSQL 환경에서도 RLS를 사용할 수 있지만, 인증된 사용자 정보를 데이터베이스에 전달하는 방법은 서비스마다 다릅니다.
+
+현재 `login_jwt` 프로젝트에는 데이터베이스와 RLS가 구현되어 있지 않으며, 유효한 JWT를 가진 모든 사용자가 같은 Product 데이터에 접근합니다. 사용자 역할과 PostgreSQL RLS를 함께 적용하는 예제는 `login_jwt_db_rls_product` 프로젝트에서 확인할 수 있습니다.
 
 ### Product 함수마다 인증을 따로 적용하려면?
 
@@ -631,6 +650,24 @@ JWT는 서버가 세션으로 보관하는 값이 아니므로, 토큰 자체의
 - 30분 후: JWT 자동 만료
 
 실제 서비스에서 토큰을 즉시 무효화해야 한다면 차단 목록, 짧은 Access Token, Refresh Token 등의 추가 설계가 필요합니다.
+
+### Refresh Token은 왜 사용하나요?
+
+Access Token은 탈취되었을 때의 피해를 줄이기 위해 사용 시간을 짧게 설정합니다. 하지만 Access Token이 만료될 때마다 사용자가 다시 로그인하면 불편하므로, 실제 서비스에서는 Refresh Token으로 새로운 Access Token을 발급받을 수 있습니다.
+
+```text
+아이디와 비밀번호로 로그인
+→ Access Token과 Refresh Token 발급
+→ Access Token으로 보호된 API 호출
+→ Access Token 만료
+→ Refresh Token을 인증 서버에 전송
+→ Refresh Token이 유효하면 새 Access Token 발급
+→ Refresh Token도 만료되거나 무효화되면 다시 로그인
+```
+
+Access Token은 보호된 API를 호출할 때 사용하고, Refresh Token은 새로운 Access Token을 발급받을 때만 사용합니다. Refresh Token은 일반적으로 Access Token보다 오래 유지되므로 더 안전하게 보관하고, 로그아웃·탈취·재사용 상황에 대비한 만료 및 폐기 정책이 필요합니다.
+
+현재 `login_jwt` 프로젝트는 학습 범위를 단순하게 유지하기 위해 Refresh Token을 구현하지 않았습니다. 따라서 Access Token이 30분 후 만료되면 사용자가 다시 로그인해야 합니다.
 
 ## 11. 실제 서비스로 발전시킬 때 필요한 것
 
